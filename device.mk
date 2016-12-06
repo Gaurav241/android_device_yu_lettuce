@@ -251,7 +251,11 @@ PRODUCT_COPY_FILES += \
 
 # Power
 PRODUCT_PACKAGES += \
-    android.hardware.power@1.1-service-qti
+    power.msm8916
+
+PRODUCT_PACKAGES += \
+    android.hardware.power@1.0-impl \
+    android.hardware.power@1.0-service
 
 # Radio
 PRODUCT_PACKAGES += \
