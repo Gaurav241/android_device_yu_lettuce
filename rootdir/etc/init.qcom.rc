@@ -40,8 +40,7 @@ on fs
     wait /dev/block/platform/soc.0/${ro.boot.bootdevice}
     symlink /dev/block/platform/soc.0/${ro.boot.bootdevice} /dev/block/bootdevice
     mount_all /vendor/etc/fstab.qcom --early
-
-    restorecon_recursive /persist
+    mkdir /persist/data 0700 system system
 
     # Start HW service manager early
     start hwservicemanager
@@ -149,7 +148,7 @@ on post-fs-data
     mkdir /data/vendor/qti-logkit/logdata/ 2750 system shell
 
     # Create /data/time folder for time-services
-    mkdir /data/time 0700 system system
+    mkdir /data/time/ 0770 system system
 
     # Tombstones
     mkdir /data/tombstones/modem 0771 system system
@@ -236,7 +235,9 @@ on boot
     # Wifi firmware reload path
     chown wifi wifi /sys/module/wlan/parameters/fwpath
 
+    # Create directory for QC time services
     mkdir /persist/time 0770 system system
+    restorecon_recursive /persist
 
     # Graphics node permissions
     chown system graphics /sys/class/graphics/fb0/dyn_pu
@@ -409,7 +410,7 @@ service perfd /vendor/bin/perfd
     disabled
 
 service time_daemon /system/vendor/bin/time_daemon
-    class late_start
+    class main
     user root
     group root
     writepid /dev/cpuset/system-background/tasks
