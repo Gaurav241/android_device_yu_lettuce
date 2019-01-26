@@ -35,7 +35,7 @@ ALL_DEFAULT_INSTALLED_MODULES += $(CMN_SYMLINKS)
 
 IMS_LIBS := libimscamera_jni.so libimsmedia_jni.so
 
-IMS_SYMLINKS := $(addprefix $(TARGET_OUT_APPS)/ims/lib/arm64/,$(notdir $(IMS_LIBS)))
+IMS_SYMLINKS := $(addprefix $(TARGET_OUT_APPS_PRIVILEGED)/ims/lib/arm64/,$(notdir $(IMS_LIBS)))
 $(IMS_SYMLINKS): $(LOCAL_INSTALLED_MODULE)
 	@echo "IMS lib link: $@"
 	@mkdir -p $(dir $@)
