@@ -17,3 +17,4 @@
 /* TODO: Actually provide implementations for these function! */
 
 void _ZNK7android11MediaBuffer8refcountEv() {}
+void _ZN7android13GraphicBufferC1EP19ANativeWindowBufferb() {}
