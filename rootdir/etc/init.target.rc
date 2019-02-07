@@ -80,11 +80,9 @@ service imsrcsservice /system/vendor/bin/imsrcsd
    class main
    user system
    group radio diag inet log oem_2950
-   disabled
 
 on property:vendor.ims.DATA_DAEMON_STATUS=1
     start ims_rtp_daemon
-    start imsrcsservice
 
 on init
     # Configure zram and zswap
