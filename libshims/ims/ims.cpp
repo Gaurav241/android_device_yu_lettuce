@@ -16,4 +16,4 @@
 
 /* TODO: Actually provide implementations for these function! */
 
-void _ZNK7android11MediaBuffer8refcountEv() {}
+extern "C" void _ZN7android5FenceD1Ev() { }

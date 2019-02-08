@@ -31,6 +31,7 @@ import /vendor/etc/init/hw/init.target.rc
 
 on early-init
     mount debugfs debugfs /sys/kernel/debug
+    chown system system /sys/kernel/debug
     chmod 0755 /sys/kernel/debug
 
     # Turn off backlight on blank
@@ -41,6 +42,7 @@ on fs
     symlink /dev/block/platform/soc.0/${ro.boot.bootdevice} /dev/block/bootdevice
     mount_all /vendor/etc/fstab.qcom --early
 
+    mkdir /persist/data 0700 system system
     restorecon_recursive /persist
 
     # Start HW service manager early
@@ -63,6 +65,9 @@ on post-fs
     chmod 0222 /sys/kernel/debug/tracing/trace_marker
 
 on post-fs-data
+    mkdir /dev/radio 0770 radio radio
+    mkdir /data/misc/ipa 0700 net_admin net_admin
+
     # Create folder for mm-qcamera-daemon
     mkdir /data/fdAlbum 0770 camera camera
     mkdir /data/misc/camera 0770 camera camera
@@ -82,6 +87,12 @@ on post-fs-data
     # Raise SDCC idle timeout value to 10 seconds
     write /sys/devices/platform/msm_sdcc.3/idle_timeout 10
 
+    # Create the directories used by CnE subsystem
+    mkdir /data/vendor/connectivity 0771 system system
+    chown radio radio /data/vendor/connectivity
+    mkdir /data/vendor/connectivity/wqeclient 0771 system system
+    chown radio radio /data/vendor/connectivity/wqeclient
+
     # Create the directories used by the Wireless subsystem
     mkdir /data/vendor/wifi 0770 wifi wifi
     mkdir /data/vendor/wifi/sockets 0770 wifi wifi
@@ -97,8 +108,25 @@ on post-fs-data
     mkdir /data/shared 0755
     chown system system /data/shared
 
-    # Create /data/time folder for time-services
+    # Create folders for time-services
     mkdir /data/time 0700 system system
+    mkdir /data/vendor/time/ 0700 system system
+
+    # qti-logkit data
+    mkdir /data/misc/qti-logkit/ 0771 system system
+    mkdir /data/misc/qti-logkit/shared-privileged/ 2770 system system
+    mkdir /data/misc/qti-logkit/shared-public/ 2770 system diag
+    mkdir /data/misc/qti-logkit/socket-privileged/ 2770 system system
+    mkdir /data/misc/qti-logkit/socket-public/ 2750 system diag
+    mkdir /data/misc/qti-logkit/logdata/ 2750 system shell
+
+    # RIDL data
+    mkdir /data/misc/SelfHost/ 0710 system shell
+    mkdir /data/misc/SelfHost/QCLogs/ 2750 system shell
+    mkdir /data/misc/SelfHost/QCLogs/temp/ 0700 system shell
+    mkdir /data/misc/SelfHost/storage/ 0700 system shell
+    mkdir /data/misc/SelfHost/Running/ 2750 system shell
+    mkdir /data/misc/SelfHost/socket/ 2770 system system
 
     # Tombstones
     mkdir /data/tombstones/modem 0771 system system
@@ -108,6 +136,9 @@ on post-fs-data
 
     setprop vold.post_fs_data_done 1
 
+on property:persist.radio.atfwd.start=false
+    stop atfwd
+
 on early-boot
     # set RLIMIT_MEMLOCK to 64MB
     setrlimit 8 67108864 67108864
@@ -115,13 +146,11 @@ on early-boot
     # Busy loop to wait for devices booted by devstart_sh just in case device not ready
     exec - root root system -- /system/vendor/bin/init.qcom.devwait.sh
 
-    # Subsystem Restart
-    # Venus
+    # SSR Setup
     write /sys/bus/msm_subsys/devices/subsys0/restart_level "related"
-    # WCNSS
     write /sys/bus/msm_subsys/devices/subsys1/restart_level "related"
-    # Modem
     write /sys/bus/msm_subsys/devices/subsys2/restart_level "related"
+    write /sys/bus/msm_subsys/devices/subsys3/restart_level "related"
 
     write /sys/kernel/boot_adsp/boot 1
 
@@ -132,6 +161,27 @@ on boot
     chown bluetooth bluetooth /dev/ttyHS0
     chmod 0660 /dev/ttyHS0
 
+    # Mark the copy complete flag to not completed
+    write /data/vendor/radio/copy_complete 0
+    chown radio radio /data/vendor/radio/copy_complete
+    chmod 0660 /data/vendor/radio/copy_complete
+
+    # copy prebuilt qcril.db files always
+    copy /vendor/radio/qcril_database/qcril.db /data/vendor/radio/qcril_prebuilt.db
+    chown radio radio /data/vendor/radio/qcril_prebuilt.db
+    chmod 0660 /data/vendor/radio/qcril_prebuilt.db
+
+    # File flags for prebuilt ril db file
+    write /data/vendor/radio/prebuilt_db_support 1
+    chown radio radio /data/vendor/radio/prebuilt_db_support
+    chmod 0400 /data/vendor/radio/prebuilt_db_support
+    write /data/vendor/radio/db_check_done 0
+    chown radio radio /data/vendor/radio/db_check_done
+    chmod 0660 /data/vendor/radio/db_check_done
+
+    # Create directory for modem config
+    mkdir /data/vendor/modem_config 0770 radio radio
+
     # Create QMUX deamon socket area
     mkdir /dev/socket/qmux_radio 2770 radio radio
     mkdir /dev/socket/qmux_audio 2770 media audio
@@ -141,9 +191,21 @@ on boot
     # Create persist folders
     mkdir /persist/alarm 0770 system system
     mkdir /persist/display 0770 system graphics
+    mkdir /persist/misc 0770 system system
+    mkdir /persist/time 0770 system system
 
     # Create NETMGR daemon socket area
     mkdir /dev/socket/netmgr 0750 radio radio
+
+    # Create netmgr log dir
+    mkdir /data/vendor/netmgr 0770 radio radio
+    chmod 0770 /data/vendor/netmgr
+
+    # Create directory for radio
+    mkdir /data/vendor/radio 0770 system radio
+
+    # Remove SUID bit for iproute2 ip tool
+    chmod 0755 /system/bin/ip
 
     # Allow RILD to access /proc/cmdline
     chmod 0644 /proc/cmdline
@@ -162,6 +224,7 @@ on boot
     write /proc/sys/net/ipv6/conf/rmnet5/accept_ra 2
     write /proc/sys/net/ipv6/conf/rmnet6/accept_ra 2
     write /proc/sys/net/ipv6/conf/rmnet7/accept_ra 2
+    write /proc/sys/net/ipv6/conf/default/accept_ra_defrtr 1
 
     # To prevent out of order acknowledgements from making
     # connection tracking to treat them as not belonging to
@@ -196,10 +259,59 @@ on boot
     # Wifi firmware reload path
     chown wifi wifi /sys/module/wlan/parameters/fwpath
 
+service cnd /vendor/bin/cnd
+    class main
+    socket cnd stream 660 root inet
+    group root wakelock
+    writepid /dev/cpuset/system-background/tasks
+
 service irsc_util /system/vendor/bin/irsc_util "/system/vendor/etc/sec_config"
     class main
     user root
     oneshot
+
+service imsqmidaemon /system/vendor/bin/imsqmidaemon
+    class main
+    user system
+    socket ims_qmid stream 0660 system radio
+    group radio log diag
+    writepid /dev/cpuset/system-background/tasks
+
+service imsdatadaemon /system/vendor/bin/imsdatadaemon
+    class main
+    user system
+    socket ims_datad stream 0660 system radio
+    group system wifi radio inet log diag
+    writepid /dev/cpuset/system-background/tasks
+    disabled
+
+on property:vendor.ims.QMI_DAEMON_STATUS=1
+    start imsdatadaemon
+
+service ims_rtp_daemon /system/vendor/bin/ims_rtp_daemon
+    class main
+    user system
+    socket ims_qmid stream 0660 system radio
+    group radio log diag
+    socket ims_rtpd stream 0660 system radio
+    group radio diag inet log
+    disabled
+
+service imsrcsservice /system/vendor/bin/imsrcsd
+    class main
+    user system
+    group radio diag inet log
+    writepid /dev/cpuset/system-background/tasks
+    disabled
+
+on property:vendor.ims.DATA_DAEMON_STATUS=1
+    start ims_rtp_daemon
+    start imsrcsservice
+
+service tftp_server /system/vendor/bin/tftp_server
+    class main
+    user root
+    writepid /dev/cpuset/system-background/tasks
 
 service rmt_storage /system/vendor/bin/rmt_storage
     class core
@@ -258,11 +370,34 @@ service wpa_supplicant /vendor/bin/hw/wpa_supplicant \
     disabled
     oneshot
 
-service ril-daemon2 /vendor/bin/hw/rild -c 2
+service atfwd /system/bin/ATFWD-daemon
+    class late_start
+    user system
+    group system radio
+
+service ril-daemon1 /system/vendor/bin/hw/rild -c 2
     class main
     user radio
-    group radio cache inet misc audio log readproc wakelock
+    group radio cache inet misc audio log readproc wakelock diag net_raw
     capabilities BLOCK_SUSPEND NET_ADMIN NET_RAW
+
+service vendor.per_mgr /vendor/bin/pm-service
+    class core
+    user system
+    group system net_raw
+    writepid /dev/cpuset/system-background/tasks
+
+service per_proxy /system/vendor/bin/pm-proxy
+    class core
+    user system
+    group system
+    disabled
+
+on property:init.svc.per_mgr=running
+    start per_proxy
+
+on property:sys.shutdown.requested=*
+    stop per_proxy
 
 service charger /sbin/poweroffcharge
     class charger
