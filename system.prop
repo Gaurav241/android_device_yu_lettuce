@@ -81,6 +81,9 @@ ro.sf.lcd_density=300
 ro.min.fling_velocity=160
 ro.max.fling_velocity=20000
 
+# FredOS Maintainer
+ro.fred.maintainer=Adithya R (ghostrider-reborn)
+
 # Healthd
 ro.enable_boot_charger_mode=1
 

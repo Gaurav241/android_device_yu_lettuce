@@ -19,6 +19,7 @@ DEVICE_PATH := device/yu/lettuce
 
 # Platform
 BOARD_USES_QCOM_HARDWARE := true
+QCOM_HARDWARE_VARIANT := msm8916
 TARGET_BOARD_PLATFORM := msm8916
 TARGET_BOOTLOADER_BOARD_NAME := MSM8916
 TARGET_NO_BOOTLOADER := true
@@ -163,9 +164,6 @@ TARGET_KERNEL_SOURCE := kernel/cyanogen/msm8916
 # Lights
 TARGET_PROVIDES_LIBLIGHT := true
 
-# LineageHW
-JAVA_SOURCE_OVERLAYS := org.lineageos.hardware|$(DEVICE_PATH)/lineagehw|**/*.java
-
 # HIDL
 DEVICE_MANIFEST_FILE := $(DEVICE_PATH)/manifest.xml
 DEVICE_MATRIX_FILE := $(DEVICE_PATH)/compatibility_matrix.xml
@@ -207,8 +205,9 @@ TARGET_USE_SDCLANG := false
 SDCLANG := false
 
 # SELinux
-include device/qcom/sepolicy-legacy/sepolicy.mk
-BOARD_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy
+#include device/qcom/sepolicy-legacy/sepolicy.mk
+#BOARD_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy
+SELINUX_IGNORE_NEVERALLOWS := true
 
 # Shims
 TARGET_LD_SHIM_LIBS := \

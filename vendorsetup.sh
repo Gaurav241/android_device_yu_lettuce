@@ -1,3 +1,6 @@
+add_lunch_combo fred_lettuce-userdebug
+add_lunch_combo fred_lettuce-eng
+
 croot
 
 export TARGET_USE_SDCLANG=false
