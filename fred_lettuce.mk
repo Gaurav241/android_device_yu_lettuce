@@ -22,6 +22,7 @@ $(call inherit-product, device/yu/lettuce/device.mk)
 
 # Inherit some common FredOS stuff
 TARGET_BOOT_ANIMATION_RES := 720
+FRED_BUILD_TYPE := OFFICIAL
 $(call inherit-product, vendor/fred/config/common.mk)
 
 # Device identifier. This must come after all inclusions
