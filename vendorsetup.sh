@@ -3,12 +3,6 @@ add_lunch_combo fred_lettuce-eng
 
 croot
 
-export TARGET_USE_SDCLANG=false
-export SDCLANG=false
-#export SDCLANG_FLAGS="-O3 -fvectorize -Wno-vectorizer-no-neon -Wno-user-defined-warnings"
-#export SDCLANG_FLAGS_2="-O3 -fvectorize -Wno-vectorizer-no-neon -Wno-user-defined-warnings"
-#export SDCLANG_COMMON_FLAGS="-O3 -fvectorize -Wno-vectorizer-no-neon -Wno-user-defined-warnings"
-
 GCC_DIR=prebuilts/gcc/linux-x86/aarch64/aarch64-opt-linux-android
 GCC_LINK="https://github.com/krasCGQ/aarch64-linux-android/"
 
