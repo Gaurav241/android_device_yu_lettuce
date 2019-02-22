@@ -1,7 +1,17 @@
 add_lunch_combo fred_lettuce-userdebug
 add_lunch_combo fred_lettuce-eng
 
+# Use legacy WLAN and BT HAL
+echo
 croot
+cd hardware/qcom/wlan
+git fetch --all
+git checkout fred/f9x-legacy
+cd ../bt
+git fetch --all
+git checkout fred/f9x-legacy
+croot
+echo
 
 GCC_DIR=prebuilts/gcc/linux-x86/aarch64/aarch64-opt-linux-android
 GCC_LINK="https://github.com/krasCGQ/aarch64-linux-android/"
