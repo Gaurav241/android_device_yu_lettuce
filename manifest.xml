@@ -278,4 +278,16 @@
             <instance>default</instance>
         </interface>
     </hal>
+    <hal format="hidl">
+        <name>vendor.qti.hardware.radio.ims</name>
+        <transport>hwbinder</transport>
+        <version>1.4</version>
+        <interface>
+            <name>IImsRadio</name>
+            <instance>imsradio0</instance>
+            <instance>imsradio1</instance>
+        </interface>
+        <fqname>@1.4::IImsRadio/imsradio0</fqname>
+        <fqname>@1.4::IImsRadio/imsradio1</fqname>
+    </hal>
 </manifest>
