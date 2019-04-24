@@ -84,6 +84,11 @@ ro.max.fling_velocity=20000
 # Healthd
 ro.enable_boot_charger_mode=1
 
+# IMS
+persist.dbg.volte_avail_ovr=0
+persist.dbg.vt_avail_ovr=0
+persist.dbg.wfc_avail_ovr=0
+
 # Media
 drm.service.enabled=1
 mm.enable.sec.smoothstreaming=true
@@ -149,6 +154,3 @@ persist.vendor.qti.inputopts.movetouchslop=0.6
 
 # Wi-Fi
 wifi.interface=wlan0
-
-# Wi-Fi display
-persist.debug.wfd.enable=1
